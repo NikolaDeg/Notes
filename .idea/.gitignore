@@ -1,5 +1,5 @@
 # Default ignored files
 /shelf/
 /workspace.xml
-/system
-/__pycache__
+/system/
+/__pycache__/
