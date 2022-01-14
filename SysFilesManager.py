@@ -4,10 +4,10 @@ import shutil
 config = {}
 
 system_dir_name = "system"  #
-config_name = "sys.con"  # f"{system_dir_name}/{config_dir_name}/{config_name}"
+config_name = "sys.con" # f"{system_dir_name}/{config_dir_name}/{config_name}"
 temp_dir_name = "temp"  # f"{system_dir_name}/{temp_dir_name}"
 config_dir_name = "config"  # f"{system_dir_name}/{config_dir_name}"
-config_splitter = " -> "
+config_splitter = "->"
 temp_name = "temp.csv"
 
 file_saved = True
@@ -17,6 +17,7 @@ def initialization():
     config["Last_file"] = "None"
     config["Trick"] = "None"
 
+    file = None
     try:
         os.mkdir(system_dir_name)
         os.mkdir(f"{system_dir_name}/{temp_dir_name}")
@@ -26,32 +27,41 @@ def initialization():
 
         for i in config.keys():
             file.write(f"{i}{config_splitter}{config[i]}\n")
-
-        file.close()
-    except:
-        repair()
-
-
-def check():
-    try:
-        try:
-            file = open(f"{system_dir_name}/{config_dir_name}/{config_name}", "r")
-            for row in file.readlines():
-                row = row.replace("\n", "").split(config_splitter)
-                try:
-                    config[row[0]] = row[1]
-                except KeyError:
-                    repair()
+    except Exception:
+        if file is not None:
             file.close()
-        except:
-            initialization()
-    except:
         repair()
+    finally:
+        if file is not None:
+            file.close()
 
 
 def repair():
     try:
         shutil.rmtree(system_dir_name)
-    except:
+    except Exception:
         pass
     initialization()
+
+
+def check():
+    try:
+        if "sys.con" in os.listdir(f"{system_dir_name}/{config_dir_name}"):
+
+            file = None
+            try:
+                file = open(f"{system_dir_name}/{config_dir_name}/{config_name}", "r")
+                for row in file.readlines():
+                    row = row.split(config_splitter)
+                    config[row[0]] = config[row[1]]
+            except FileNotFoundError:
+                file.close()
+                initialization()
+            finally:
+                if file is not None:
+                    file.close()
+        else:
+            initialization()
+    except Exception:
+        repair()
+        
