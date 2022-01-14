@@ -1,10 +1,10 @@
 import csv
 import os
 import shutil
+import main
 
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QErrorMessage
-
 import SysFilesManager
 
 
@@ -71,7 +71,11 @@ def saveCSV(path):
 
 
 def addCSV(data):
-    with open(f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}/{SysFilesManager.temp_name}", "a+", newline='') as file:
-        writer = csv.writer(file, delimiter=";")
-        writer.writerow(data)
-    SysFilesManager.file_saved = False
+    try:
+        with open(f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}/{SysFilesManager.temp_name}", "a+", newline='') as file:
+            writer = csv.writer(file, delimiter=";")
+            writer.writerow(data)
+    except PermissionError:
+        main.Window.error("Временный файл открыт в другой программе, закроёте её.")
+    else:
+        SysFilesManager.file_saved = False

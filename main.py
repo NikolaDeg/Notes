@@ -105,6 +105,13 @@ class Window(QMainWindow, Ui_MainWindow): #основное окно
         CSVManager.saveCSV(path[0])
         self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", f"Tasks - {SysFilesManager.config['Last_file'].split('/')[-1]}"))
 
+    @staticmethod
+    def error(dis):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText(dis)
+        msg.setWindowTitle("Ошибка")
+        msg.exec_()
 
 if __name__ == "__main__":
     SysFilesManager.check()
@@ -112,6 +119,5 @@ if __name__ == "__main__":
     app = QApplication([])
     application = Window()
     application.show()
-    SysFilesManager.initialization()
 
     sys.exit(app.exec())

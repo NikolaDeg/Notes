@@ -1,5 +1,6 @@
 import os
 import shutil
+import main
 
 config = {}
 
@@ -27,13 +28,10 @@ def initialization():
 
         for i in config.keys():
             file.write(f"{i}{config_splitter}{config[i]}\n")
+
+        file.close()
     except Exception:
-        if file is not None:
-            file.close()
         repair()
-    finally:
-        if file is not None:
-            file.close()
 
 
 def repair():
@@ -44,24 +42,27 @@ def repair():
     initialization()
 
 
-def check():
+def new_repair(path):
     try:
-        if "sys.con" in os.listdir(f"{system_dir_name}/{config_dir_name}"):
+        open(path, "w")
+    except Exception as ex:
+        main.Window.error(str(ex))
 
-            file = None
-            try:
-                file = open(f"{system_dir_name}/{config_dir_name}/{config_name}", "r")
-                for row in file.readlines():
-                    row = row.split(config_splitter)
-                    config[row[0]] = config[row[1]]
-            except FileNotFoundError:
-                file.close()
-                initialization()
-            finally:
-                if file is not None:
-                    file.close()
-        else:
-            initialization()
+
+#def new_initializaion()
+
+def check():
+    path = f"{system_dir_name}/{config_dir_name}/{config_name}"
+    try:
+        file = open(path, "r")
+        for row in file.readlines():
+            row = row.replace("\n", "").split(config_splitter)
+            config[row[0]] = row[1]
+            file.close()
+    except FileNotFoundError:
+        new_repair(path)
+    except PermissionError:
+        main.Window.error("Файл конфигурации открыт в другой программе, закроёте её.")
     except Exception:
         repair()
         
