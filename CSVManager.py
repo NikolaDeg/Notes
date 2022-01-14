@@ -1,81 +1,74 @@
 import csv
 import os
 import shutil
-import main
 
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import QErrorMessage
+
 import SysFilesManager
+import MessageBoxes
 
 
-def copyCSV(path):
+# Copies
+def copy_csv(path):
     try:
         SysFilesManager.config["Last_file"] = path
         shutil.copyfile(path, f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}/{SysFilesManager.temp_name}")
-    except Exception:
-        SysFilesManager.repair()
+    except PermissionError:
+        MessageBoxes.error('Something wrong with permissions')
+    except Exception as ex:
+        MessageBoxes.error(str(ex))
 
 
-def returnModel(clear: bool):
-    if clear:
-        return QStandardItemModel()
-    else:
+# Returns data to TebleView
+def return_model(clear: bool):
+    if not clear:
         try:
             model = QStandardItemModel()
-            with open(f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}/{SysFilesManager.temp_name}",
-                      "r") as file:
-                for row in csv.reader(file):
-                    row = str(row).replace("']", "").replace("['", "").split(";")
-                    items = [
-                        QStandardItem(data)
-                        for data in row
-                    ]
-                    model.appendRow(items)
 
+            file = open(f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}/{SysFilesManager.temp_name}")
+
+            for row in csv.reader(file):
+                row = str(row).replace("']", "").replace("['", "").split(";")
+                items = [
+                    QStandardItem(data)
+                    for data in row
+                ]
+                model.appendRow(items)
+
+            model.setHorizontalHeaderLabels(['Date', 'Time', 'Name', 'Description'])
+
+        except Exception as ex:
+            MessageBoxes.error(str(ex))
+            return QStandardItemModel().setHorizontalHeaderLabels(['Date', 'Time', 'Name', 'Description'])
+        else:
             return model
-        except Exception:
-            SysFilesManager.repair()
+    else:
+        return QStandardItemModel().setHorizontalHeaderLabels(['Date', 'Time', 'Name', 'Description'])
 
 
-def createCSV():
+# Creates temporally file
+def create_csv():
+    path = f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}/{SysFilesManager.temp_name}"
     try:
-        SysFilesManager.config["Last_file"] = "None"
-        for filename in os.listdir(f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}"):
-            file_path = os.path.join(f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}", filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                error_dialog = QErrorMessage()
-                error_dialog.showMessage(f'Failed to delete {file_path}. Reason: {e}')
-
-        fullPath = f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}/{SysFilesManager.temp_name}"
-        file = None
-        try:
-            file = open(fullPath, "x")
-        except FileExistsError:
-            error_dialog = QErrorMessage()
-            error_dialog.showMessage('File already exists. Delete it. NOW! Or rename.')
-        finally:
-            if file is not None:
-                file.close()
-    except Exception:
-        SysFilesManager.repair()
+        file = open(path, "w")
+        file.close()
+    except FileExistsError:
+        MessageBoxes.error('File already exists. Delete it. NOW! Or rename.')
 
 
-def saveCSV(path):
+# Copies temporally file
+def save_csv(path):
     shutil.copyfile(f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}/{SysFilesManager.temp_name}", path)
     SysFilesManager.file_saved = True
 
 
-def addCSV(data):
+# Adds information to temporally file
+def add_csv(data):
     try:
         with open(f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}/{SysFilesManager.temp_name}", "a+", newline='') as file:
             writer = csv.writer(file, delimiter=";")
             writer.writerow(data)
     except PermissionError:
-        main.Window.error("Временный файл открыт в другой программе, закроёте её.")
+        MessageBoxes.error("Temporally file opened in other program, close it")
     else:
         SysFilesManager.file_saved = False

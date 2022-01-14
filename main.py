@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox, QWidget, QErrorMessage, QFileDialog
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox, QFileDialog
+from PyQt5.QtGui import QStandardItemModel
 
 from Py_Interface_files.Main_interface import Ui_MainWindow
 from Py_Interface_files.Dialog_note_edit import Ui_Dialog as Ui_TaksEdit
@@ -13,6 +13,7 @@ import csv
 
 import CSVManager
 import SysFilesManager
+
 
 class TaskEdit(QDialog, Ui_TaksEdit): #диалоговое окно редактирования задания
     def __init__(self, parent=None):
@@ -45,76 +46,75 @@ class Window(QMainWindow, Ui_MainWindow): #основное окно
         self.ui.setupUi(self)
 
         self.ui.model = QStandardItemModel()
-        self.ui.model.setHorizontalHeaderLabels(['Дата', 'Время', 'Название', 'Описание'])
+        self.ui.model.setHorizontalHeaderLabels(['Date', 'Time', 'Name', 'Description'])
         self.ui.tableView.setModel(self.ui.model)
         self.ui.tableView.setEnabled(False)
 
-        self.ui.create.triggered.connect(self.createClicked)
-        self.ui.save.triggered.connect(self.saveClicked)
-        self.ui.saveAs.triggered.connect(self.saveAsClicked)
-        self.ui.open.triggered.connect(self.loadClicked)
-        self.ui.add.triggered.connect(self.addClicked)
+        self.ui.create.triggered.connect(self.create_clicked)
+        self.ui.save.triggered.connect(self.save_clicked)
+        self.ui.saveAs.triggered.connect(self.save_as_clicked)
+        self.ui.open.triggered.connect(self.load_clicked)
+        self.ui.add.triggered.connect(self.add_clicked)
 
-    def createClicked(self):
+    def create_clicked(self):
         if SysFilesManager.file_saved:
-            CSVManager.createCSV()
-            CSVManager.returnModel(True)
+            CSVManager.create_csv()
+            CSVManager.return_model(True)
             self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", "Tasks - temp*"))
         else:
-            reply = QMessageBox.question(self, 'Creation', "Вы уверенны, что хотите создать новый файл?\nНесохранённые изменения будут утеряны.", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            reply = QMessageBox.question(self, 'Creation', "Are you sure you want to create a new file?\nUnsaved changes will be lost", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
             if reply == QMessageBox.Yes:
-                CSVManager.createCSV()
-                CSVManager.returnModel(True)
+                CSVManager.create_csv()
+                CSVManager.return_model(True)
                 self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", "Tasks - temp*"))
             else:
                 pass
 
-    def addClicked(self):
+    # Event method
+    def add_clicked(self):
         dialog = TaskEdit()
         dialog.show()
         dialog.exec_()
         if dialog.Data is not None:
-            CSVManager.addCSV(dialog.Data)
-            self.ui.model = CSVManager.returnModel(False)
+            CSVManager.add_csv(dialog.Data)
+            self.ui.model = CSVManager.return_model(False)
             self.ui.tableView.setModel(self.ui.model)
             self.ui.tableView.update()
-            self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", f"Tasks - {SysFilesManager.config['Last_file'].split('/')[-1]}*"))
+            if not SysFilesManager.config["Last_file"] == "None":
+                self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", f"Tasks - {SysFilesManager.config['Last_file'].split('/')[-1]}*"))
+            else:
+                self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", "Tasks - temp*"))
 
-    def loadClicked(self):
+    # Event method
+    def load_clicked(self):
         path = QFileDialog.getOpenFileName(self, 'Save File', filter="Tables (*.csv)", directory=os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop'))
-        CSVManager.copyCSV(path[0])
-        self.ui.model = CSVManager.returnModel(False)
+        CSVManager.copy_csv(path[0])
+        self.ui.model = CSVManager.return_model(False)
         self.ui.tableView.setModel(self.ui.model)
         self.ui.tableView.update()
         self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", f"Tasks - {path[0].split('/')[-1]}"))
 
-    def saveClicked(self):
+    # Event method
+    def save_clicked(self):
         if SysFilesManager.config["Last_file"] == "None":
             path = QFileDialog.getSaveFileName(self, 'Save File', filter="Tables (*.csv)", directory=os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop'))
             SysFilesManager.config["Last_file"] = path[0]
-            CSVManager.saveCSV(path[0])
+            CSVManager.save_csv(path[0])
         else:
-            CSVManager.saveCSV(SysFilesManager.config["Last_file"])
+            CSVManager.save_csv(SysFilesManager.config["Last_file"])
         self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", f"Tasks - {SysFilesManager.config['Last_file'].split('/')[-1]}"))
 
-
-    def saveAsClicked(self):
+    # Event method
+    def save_as_clicked(self):
         path = QFileDialog.getSaveFileName(self, 'Save File', filter="Tables (*.csv)", directory=os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop'))
         SysFilesManager.config["Last_file"] = path[0]
-        CSVManager.saveCSV(path[0])
+        CSVManager.save_csv(path[0])
         self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", f"Tasks - {SysFilesManager.config['Last_file'].split('/')[-1]}"))
 
-    @staticmethod
-    def error(dis):
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Critical)
-        msg.setText(dis)
-        msg.setWindowTitle("Ошибка")
-        msg.exec_()
 
 if __name__ == "__main__":
-    SysFilesManager.check()
+    SysFilesManager.start()
 
     app = QApplication([])
     application = Window()
