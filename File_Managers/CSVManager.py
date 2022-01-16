@@ -1,11 +1,10 @@
 import csv
-import os
 import shutil
 
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
 import SysFilesManager
-import MessageBoxes
+from Auxiliary import MessageBoxes
 
 
 # Copies

@@ -4,15 +4,11 @@ from PyQt5.QtGui import QStandardItemModel
 
 from Py_Interface_files.Main_interface import Ui_MainWindow
 from Py_Interface_files.Dialog_note_edit import Ui_Dialog as Ui_TaksEdit
-from Py_Interface_files.Dialog_date_edit import Ui_Dialog as Ui_DateEdit
 
 import os
-import io
 import sys
-import csv
 
-import CSVManager
-import SysFilesManager
+from File_Managers import CSVManager, SysFilesManager
 
 
 class TaskEdit(QDialog, Ui_TaksEdit): #диалоговое окно редактирования задания

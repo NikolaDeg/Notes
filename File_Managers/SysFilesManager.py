@@ -1,13 +1,12 @@
 import os
-import main
-import MessageBoxes
+from Auxiliary import MessageBoxes
 
 config = {}
 
 config["Last_file"] = "None"
 config["Trick"] = "None"
 
-system_dir_name = "system"  #
+system_dir_name = "../system"  #
 config_name = "sys.con" # f"{system_dir_name}/{config_dir_name}/{config_name}"
 temp_dir_name = "temp"  # f"{system_dir_name}/{temp_dir_name}"
 config_dir_name = "config"  # f"{system_dir_name}/{config_dir_name}"
