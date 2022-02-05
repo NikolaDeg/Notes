@@ -3,7 +3,7 @@ import shutil
 
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
-import SysFilesManager
+from File_Managers import SysFilesManager
 from Auxiliary import MessageBoxes
 
 
@@ -24,15 +24,15 @@ def return_model(clear: bool):
         try:
             model = QStandardItemModel()
 
-            file = open(f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}/{SysFilesManager.temp_name}")
+            with open(f"{SysFilesManager.system_dir_name}/{SysFilesManager.temp_dir_name}/{SysFilesManager.temp_name}") as file:
 
-            for row in csv.reader(file):
-                row = str(row).replace("']", "").replace("['", "").split(";")
-                items = [
-                    QStandardItem(data)
-                    for data in row
-                ]
-                model.appendRow(items)
+                for row in csv.reader(file):
+                    row = str(row).replace("']", "").replace("['", "").split(";")
+                    items = [
+                        QStandardItem(data)
+                        for data in row
+                    ]
+                    model.appendRow(items)
 
             model.setHorizontalHeaderLabels(['Date', 'Time', 'Name', 'Description'])
 

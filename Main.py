@@ -85,11 +85,16 @@ class Window(QMainWindow, Ui_MainWindow): #основное окно
     # Event method
     def load_clicked(self):
         path = QFileDialog.getOpenFileName(self, 'Save File', filter="Tables (*.csv)", directory=os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop'))
-        CSVManager.copy_csv(path[0])
-        self.ui.model = CSVManager.return_model(False)
-        self.ui.tableView.setModel(self.ui.model)
-        self.ui.tableView.update()
-        self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", f"Tasks - {path[0].split('/')[-1]}"))
+        self.load_file(path[0])
+
+    # Load CSV
+    def load_file(self, path):
+        if os.path.exists(path):
+            CSVManager.copy_csv(path)
+            self.ui.model = CSVManager.return_model(False)
+            self.ui.tableView.setModel(self.ui.model)
+            self.ui.tableView.update()
+            self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", f"Tasks - {path[0].split('/')[-1]}"))
 
     # Event method
     def save_clicked(self):
@@ -115,5 +120,7 @@ if __name__ == "__main__":
     app = QApplication([])
     application = Window()
     application.show()
+
+    application.load_file(SysFilesManager.config["Last_file"])
 
     sys.exit(app.exec())

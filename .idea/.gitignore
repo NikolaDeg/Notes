@@ -3,3 +3,9 @@
 /workspace.xml
 /system/
 /__pycache__/
+/env
+/.vs/
+/Auxiliary/__pycache__/
+/File_Managers/__pycache__/
+/Py_Interface_files/__pycache__/
+/env

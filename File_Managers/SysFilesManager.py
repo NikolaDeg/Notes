@@ -6,7 +6,7 @@ config = {}
 config["Last_file"] = "None"
 config["Trick"] = "None"
 
-system_dir_name = "../system"  #
+system_dir_name = "system"  #
 config_name = "sys.con" # f"{system_dir_name}/{config_dir_name}/{config_name}"
 temp_dir_name = "temp"  # f"{system_dir_name}/{temp_dir_name}"
 config_dir_name = "config"  # f"{system_dir_name}/{config_dir_name}"
@@ -25,12 +25,11 @@ def write_config_file():
 
     # Trying to write data
     try:
-        file = open(path, "w")
+        with open(path, "w") as file:
 
-        for i in config.keys():
-            file.write(f"{i}{config_splitter}{config[i]}\n")
+            for i in config.keys():
+                file.write(f"{i}{config_splitter}{config[i]}\n")
 
-        file.close()
     except FileNotFoundError:
         create_file(path)
     except Exception as ex:
@@ -43,24 +42,27 @@ def read_config_file():
 
     # Trying to read data
     try:
-        file = open(path, "r")
+        with open(path, "r") as file:
+            if len(file.readlines()) == len(config):
+                for row in file.readlines():
+                    row = row.replace("\n", "").split(config_splitter)
 
-        for row in file.readlines():
-            row = row.replace("\n", "").split(config_splitter)
-
-            try:
-                config[row[0]] = row[1]
-            except KeyError:
-                write_config_file()
-            except Exception as ex:
-                MessageBoxes.error(str(ex))
-
-        file.close()
+                    try:
+                        config[row[0]] = row[1]
+                    except KeyError:
+                        break
+                        write_config_file()
+                    except Exception as ex:
+                        break
+                        MessageBoxes.error(str(ex))
+            else:
+                 write_config_file()
+        
     except FileNotFoundError:
         create_file(path)
         read_config_file()
     except PermissionError:
-        main.Window.error("File opened in other program, close it")
+        MessageBoxes.error("File opened in other program, close it")
     except Exception as ex:
         MessageBoxes.error(str(ex))
 
@@ -93,3 +95,5 @@ def start():
             create_file(path)
 
     read_config_file()
+
+
